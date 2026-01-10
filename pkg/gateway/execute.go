@@ -248,11 +248,6 @@ func (c *GatewayClient) buildCancelProductOrdersPayload(productIDs []int) *types
 }
 
 func (c *GatewayClient) buildCancelOrdersPayload(params *types.CancelOrdersParam) *types.CancelOrdersPayload {
-	subName := params.SubAccountName
-	if subName == "" {
-		subName = "default"
-	}
-
 	senderStr := c.signer.SubAccount()
 	var senderBytes32 [32]byte
 	senderBytes, _ := hex.DecodeString(senderStr[2:])

@@ -75,7 +75,6 @@ func TestCancelAndPlaceOrder(t *testing.T) {
 		Params: []types.CancelOrderParam{
 			{ProductID: 2, Digest: "0xeea87b520108b5649b14cd2236c6a537aeefcf44142c1756aedc66cffddf3468"},
 		},
-		SubAccountName: "default",
 	})
 
 	if err != nil {
@@ -92,7 +91,6 @@ func TestCancelOrders(t *testing.T) {
 			{ProductID: 2, Digest: "0xfd57771d66aff5b39c8437c299d224a9b6a7ce810b680a4f66d48ff539e90d73"},
 			{ProductID: 2, Digest: "0x463ca19ebc18fb5379fcce78123bf97cf3406852b5d27bb1260dada76623dbef"},
 		},
-		SubAccountName: "default",
 	})
 	if err != nil {
 		t.Fatal(err)
