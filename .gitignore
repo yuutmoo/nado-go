@@ -1,0 +1,22 @@
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.iml
+
+# Binaries and executables
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Dependency folders
+vendor/
+
+# Environment variables (Sensitive info)
+.env
+
+# Go test coverage files
+*.out
