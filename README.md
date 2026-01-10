@@ -1,7 +1,7 @@
 # nado-go
 
 
-A Go implementation of the [nado.xyz](https://nado.xyz) API, featuring dual-stream isolation and automatic EIP-712 authentication.
+A Go implementation of the [nado.xyz](https://nado.xyz) API.
 
 ## Usage
 
