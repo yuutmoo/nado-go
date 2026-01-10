@@ -114,8 +114,6 @@ type CancelOrdersPayload struct {
 
 type CancelOrdersParam struct {
 	Params []CancelOrderParam
-
-	SubAccountName string
 }
 type CancelOrderParam struct {
 	ProductID int

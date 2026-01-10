@@ -9,12 +9,11 @@ const (
 	OrderTypePostOnly OrderType = 3
 )
 
-// 新增：触发类型 (Trigger Type)
 type TriggerType int
 
 const (
 	TriggerTypeNone              TriggerType = 0
-	TriggerTypePrice             TriggerType = 1 // 止盈止损通常用这个
+	TriggerTypePrice             TriggerType = 1
 	TriggerTypeTwap              TriggerType = 2
 	TriggerTypeTwapCustomAmounts TriggerType = 3
 )
