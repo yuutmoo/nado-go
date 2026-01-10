@@ -3,7 +3,7 @@ package gateway
 import (
 	"context"
 	"fmt"
-	"nado/pkg/types"
+	"github.com/yuutmoo/nado-go/pkg/types"
 	"testing"
 	"time"
 )

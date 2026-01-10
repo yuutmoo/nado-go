@@ -2,8 +2,8 @@ package stream
 
 import (
 	"context"
-	"nado/pkg/common"
-	"nado/pkg/signer"
+	"github.com/yuutmoo/nado-go/pkg/common"
+	"github.com/yuutmoo/nado-go/pkg/signer"
 	"testing"
 )
 

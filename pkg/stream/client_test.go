@@ -6,7 +6,7 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/coder/websocket"
 	"github.com/stretchr/testify/assert"
-	"nado/pkg/common"
+	"github.com/yuutmoo/nado-go/pkg/common"
 	"net/http"
 	"net/http/httptest"
 	"strings"

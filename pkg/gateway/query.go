@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"nado/pkg/common"
-	"nado/pkg/types"
+	"github.com/yuutmoo/nado-go/pkg/common"
+	"github.com/yuutmoo/nado-go/pkg/types"
 	"net/url"
 )
 

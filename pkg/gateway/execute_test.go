@@ -3,8 +3,8 @@ package gateway
 import (
 	"context"
 	"github.com/kr/pretty"
-	"nado/pkg/common"
-	"nado/pkg/types"
+	"github.com/yuutmoo/nado-go/pkg/common"
+	"github.com/yuutmoo/nado-go/pkg/types"
 	"testing"
 )
 

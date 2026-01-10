@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"nado/pkg/signer"
+	"github.com/yuutmoo/nado-go/pkg/signer"
 	"time"
 )
 
