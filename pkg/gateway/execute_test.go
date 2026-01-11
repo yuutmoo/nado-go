@@ -80,10 +80,9 @@ func TestCancelOrders(t *testing.T) {
 
 	orders, err := c.CancelOrders(context.Background(), &types.CancelOrdersParam{
 		Params: []types.CancelOrderParam{
-			{ProductID: 2, Digest: "0x52a62de58a2b0521ed352d7ac358aa7f88ec1138a31999c0092cbf80c188c37b"},
-			{ProductID: 2, Digest: "0x463ca19ebc18fb5379fcce78123bf97cf3406852b5d27bb1260dada76623dbef"},
+			{ProductID: 2, Digest: "0x7a26be95e07ec83459a3940bd95560093abf559eadc9186fcd2473279b480b30"},
 		},
-	})
+	}, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,7 +91,7 @@ func TestCancelOrders(t *testing.T) {
 
 func TestCancelProductOrders(t *testing.T) {
 	c := setupTestClient(t)
-	orders, err := c.CancelProductOrders(context.Background(), []int{3})
+	orders, err := c.CancelProductOrders(context.Background(), []int{3}, false)
 	if err != nil {
 		t.Fatal(err)
 	}

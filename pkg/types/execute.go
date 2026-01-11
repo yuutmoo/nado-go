@@ -12,45 +12,17 @@ type PlaceOrderParam struct {
 	OrderType  OrderType
 	ReduceOnly bool
 
-	Options *OrderOptions
+	Isolated       bool
+	IsolatedMargin float64
 
+	Trigger *TriggerConfig
 	//Optional
 	Expiration   *uint64
 	ID           *int64
 	SpotLeverage *bool
 }
 
-// OrderOptions encapsulates all advanced fields that influence the construction of the Order Appendix.
-// These are optional settings for complex order types (TWAP, Isolated Margin, etc.).
-type OrderOptions struct {
-	// Trigger settings (e.g., Stop Loss, Take Profit, TWAP).
-	// If nil, defaults to TriggerTypeNone.
-	Trigger *TriggerOptions
-
-	// Margin mode configuration.
-	// If nil, defaults to Cross Margin mode.
-	Isolated *IsolatedMargin
-
-	// Spot leverage toggle.
-	// Indicates if borrowing is allowed for spot trades.
-	SpotLeverage *bool
-}
-
-// TriggerOptions maps to the "Trigger Type" and "Value" fields in the 128-bit Order Appendix.
-type TriggerOptions struct {
-	Type TriggerType // e.g., TriggerTypePrice, TriggerTypeTwap, TriggerTypeTwapCustom
-
-	// The following fields are valid only when Type is TriggerTypeTwap or TriggerTypeTwapCustom.
-
-	TwapCount    uint32  // Number of execution intervals.
-	TwapSlippage float64 // Maximum acceptable slippage (e.g., 0.01 for 1%).
-}
-
-// IsolatedMargin maps to the "Isolated" flag and "Value" field in the 128-bit Order Appendix.
-type IsolatedMargin struct {
-	// Amount of collateral (margin) to transfer to the isolated subaccount for this order.
-	Amount float64
-}
+// --------------------------------------------------------------
 
 type OrderBody struct {
 	Sender     string `json:"sender"`
@@ -62,11 +34,12 @@ type OrderBody struct {
 }
 
 type PlaceOrderDetails struct {
-	ProductID    int       `json:"product_id"`
-	Order        OrderBody `json:"order"`
-	Signature    string    `json:"signature"`
-	ID           *int64    `json:"id,omitempty"`
-	SpotLeverage *bool     `json:"spot_leverage,omitempty"`
+	ProductID    int              `json:"product_id"`
+	Order        OrderBody        `json:"order"`
+	Signature    string           `json:"signature"`
+	ID           *int64           `json:"id,omitempty"`
+	Trigger      *TriggerCriteria `json:"trigger"`
+	SpotLeverage *bool            `json:"spot_leverage,omitempty"`
 }
 
 type PlaceOrderPayload struct {

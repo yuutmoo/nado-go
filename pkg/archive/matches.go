@@ -109,7 +109,7 @@ type TxOrder struct {
 	Sender     string `json:"sender"`
 	PriceX18   string `json:"price_x18"` // Note: API uses snake_case here
 	Amount     string `json:"amount"`
-	Expiration int64  `json:"expiration"` // Note: int64 here, string in MatchOrder
+	Expiration uint64 `json:"expiration"` // Note: int64 here, string in MatchOrder
 	Appendix   string `json:"appendix"`
 	Nonce      int64  `json:"nonce"` // Note: int64 here, string in MatchOrder
 }

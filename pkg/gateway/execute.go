@@ -17,12 +17,23 @@ func (c *GatewayClient) PlaceOrder(ctx context.Context, params *types.PlaceOrder
 		return nil, fmt.Errorf("execution failed: no signer configured")
 	}
 
-	targetURL := c.buildGatewayURL(common.PathExecute)
+	if err := params.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid order parameters: %w", err)
+	}
+
 	var resp types.PlaceOrderResponse
 
 	po := c.buildPlaceOrder(params)
+	if po == nil {
+		return nil, fmt.Errorf("build placeOrder response failed")
+	}
 	payload := &types.PlaceOrderPayload{
 		PlaceOrder: *po,
+	}
+
+	targetURL := c.buildGatewayURL(common.PathExecute)
+	if params.Trigger != nil {
+		targetURL = c.buildTriggerURL(common.PathExecute)
 	}
 
 	if err := c.post(ctx, targetURL, payload, &resp); err != nil {
@@ -54,6 +65,9 @@ func (c *GatewayClient) PlaceOrders(ctx context.Context, orders []*types.PlaceOr
 	}
 
 	targetURL := c.buildGatewayURL(common.PathExecute)
+	if orders[0].Trigger != nil {
+		targetURL = c.buildTriggerURL(common.PathExecute)
+	}
 
 	var resp types.PlaceOrdersResponse
 	if err := c.post(ctx, targetURL, payload, &resp); err != nil {
@@ -78,6 +92,17 @@ func (c *GatewayClient) buildPlaceOrder(params *types.PlaceOrderParam) *types.Pl
 	} else {
 		fmt.Println("product priceTick, amountTick not found in cache")
 		return nil
+	}
+
+	var triggerObj *types.TriggerCriteria
+	if params.Trigger != nil {
+		triggerObj = &types.TriggerCriteria{}
+		if params.Trigger.PriceTrigger != nil {
+			triggerObj.PriceTrigger = params.Trigger.PriceTrigger.ToRequest(amountTick)
+		}
+		if params.Trigger.TimeTrigger != nil {
+			triggerObj.TimeTrigger = params.Trigger.TimeTrigger.ToRequest(amountTick)
+		}
 	}
 
 	senderHex := c.signer.SubAccount()
@@ -106,7 +131,7 @@ func (c *GatewayClient) buildPlaceOrder(params *types.PlaceOrderParam) *types.Pl
 	senderBytes, _ := hex.DecodeString(senderHex[2:])
 	copy(senderBytes32[:], senderBytes)
 
-	appendix := common.BuildAppendix(params)
+	appendix := BuildAppendix(params)
 
 	internalOrder := &signer.OrderSignRequest{
 		ProductID:  params.ProductID,
@@ -136,6 +161,7 @@ func (c *GatewayClient) buildPlaceOrder(params *types.PlaceOrderParam) *types.Pl
 	return &types.PlaceOrderDetails{
 		ProductID:    params.ProductID,
 		Order:        order,
+		Trigger:      triggerObj,
 		Signature:    sig,
 		ID:           params.ID,
 		SpotLeverage: params.SpotLeverage,
@@ -143,7 +169,7 @@ func (c *GatewayClient) buildPlaceOrder(params *types.PlaceOrderParam) *types.Pl
 
 }
 
-func (c *GatewayClient) CancelOrders(ctx context.Context, params *types.CancelOrdersParam) (*types.CancelOrdersData, error) {
+func (c *GatewayClient) CancelOrders(ctx context.Context, params *types.CancelOrdersParam, isTrigger bool) (*types.CancelOrdersData, error) {
 
 	if c.signer == nil {
 		return nil, fmt.Errorf("execution failed: no signer configured")
@@ -151,11 +177,14 @@ func (c *GatewayClient) CancelOrders(ctx context.Context, params *types.CancelOr
 	if len(params.Params) == 0 {
 		return nil, fmt.Errorf("param is empty")
 	}
-	targetURL := c.buildGatewayURL(common.PathExecute)
 
 	var resp types.CancelOrdersResponse
 	payload := c.buildCancelOrdersPayload(params)
 
+	targetURL := c.buildGatewayURL(common.PathExecute)
+	if isTrigger {
+		targetURL = c.buildTriggerURL(common.PathExecute)
+	}
 	if err := c.post(ctx, targetURL, payload, &resp); err != nil {
 		return nil, err
 	}
@@ -167,14 +196,17 @@ func (c *GatewayClient) CancelOrders(ctx context.Context, params *types.CancelOr
 
 }
 
-func (c *GatewayClient) CancelProductOrders(ctx context.Context, productIDs []int) (*types.CancelOrdersData, error) {
+func (c *GatewayClient) CancelProductOrders(ctx context.Context, productIDs []int, isTrigger bool) (*types.CancelOrdersData, error) {
 	if len(productIDs) == 0 {
 		return nil, fmt.Errorf("productIDs is empty")
 	}
-	targetURL := c.buildGatewayURL(common.PathExecute)
 	payload := c.buildCancelProductOrdersPayload(productIDs)
 	var resp types.CancelOrdersResponse
 
+	targetURL := c.buildGatewayURL(common.PathExecute)
+	if isTrigger {
+		targetURL = c.buildTriggerURL(common.PathExecute)
+	}
 	if err := c.post(ctx, targetURL, payload, &resp); err != nil {
 		return nil, err
 	}
@@ -363,5 +395,74 @@ func (c *GatewayClient) WithdrawCollateral(ctx context.Context, productId int, a
 	}
 
 	return nil
+
+}
+
+func BuildAppendix(params *types.PlaceOrderParam) *big.Int {
+
+	// Bit Layout (from docs):
+	// Version (0-7): 1
+	// Isolated (8): 0 (assuming cross margin)
+	// Order Type (9-10)
+	// Reduce Only (11)
+	appendix := big.NewInt(0)
+
+	// 1. Version (0-7): 1
+	appendix.Or(appendix, big.NewInt(1))
+
+	// 2. Isolated (8)
+	if params.Isolated {
+		appendix.SetBit(appendix, 8, 1)
+	}
+
+	// 3. Order Type (9-10)
+	typeBig := new(big.Int).SetInt64(int64(params.OrderType))
+	appendix.Or(appendix, typeBig.Lsh(typeBig, 9))
+
+	// 4. Reduce Only (11)
+	if params.ReduceOnly {
+		appendix.SetBit(appendix, 11, 1)
+	}
+
+	// 5. Trigger Type (12-13)
+	triggerType := types.TriggerTypeNone
+	if params.Trigger != nil {
+		if params.Trigger.TimeTrigger != nil {
+			triggerType = types.TriggerTypeTwap
+			if len(params.Trigger.TimeTrigger.Amounts) > 0 {
+				triggerType = types.TriggerTypeCustomAmount
+				appendix.SetBit(appendix, 13, 1)
+			}
+		} else if params.Trigger.PriceTrigger != nil {
+			triggerType = types.TriggerTypePrice
+		}
+	}
+
+	trigVal := new(big.Int).SetInt64(int64(triggerType))
+	appendix.Or(appendix, trigVal.Lsh(trigVal, 12))
+
+	// 6. Value (64-127)
+	valuePart := big.NewInt(0)
+
+	if triggerType == types.TriggerTypeTwap || triggerType == types.TriggerTypeCustomAmount {
+		slippageX6 := common.ToX6(params.Trigger.TimeTrigger.Slippage)
+		valuePart.SetInt64(slippageX6)
+
+		times := len(params.Trigger.TimeTrigger.Amounts)
+		if times == 0 {
+			times = params.Trigger.TimeTrigger.Times
+		}
+		timesBig := new(big.Int).SetInt64(int64(times))
+		valuePart.Or(valuePart, timesBig.Lsh(timesBig, 32))
+	} else if params.Isolated {
+		marginX6 := common.ToX6(params.IsolatedMargin)
+		valuePart.SetInt64(marginX6)
+	}
+
+	if valuePart.Sign() != 0 {
+		appendix.Or(appendix, valuePart.Lsh(valuePart, 64))
+	}
+
+	return appendix
 
 }

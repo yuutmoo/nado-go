@@ -74,7 +74,6 @@ func (c *GatewayClient) do(ctx context.Context, method, fullURL string, payload 
 		if err != nil {
 			return fmt.Errorf("marshal payload failed: %w", err)
 		}
-
 		bodyReader = bytes.NewBuffer(jsonBytes)
 	}
 	req, err := http.NewRequestWithContext(ctx, method, fullURL, bodyReader)
@@ -123,6 +122,10 @@ func (c *GatewayClient) buildGatewayURL(path string) string {
 // buildGatewayV2URL for V2 endpoints
 func (c *GatewayClient) buildGatewayV2URL(path string) string {
 	return c.network.GatewayV2 + path
+}
+
+func (c *GatewayClient) buildTriggerURL(path string) string {
+	return c.network.TriggerREST + path
 }
 
 func (c *GatewayClient) syncProducts() {

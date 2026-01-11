@@ -102,13 +102,13 @@ type WSLatestCandlestick struct {
 
 type WSFundingPayment struct {
 	Type                      string `json:"type"`
-	Timestamp                 int64  `json:"timestamp"`
+	Timestamp                 string `json:"timestamp"`
 	ProductId                 int    `json:"product_id"`
 	PaymentAmount             string `json:"payment_amount"`
 	OpenInterest              string `json:"open_interest"`
 	CumulativeFundingLongX18  string `json:"cumulative_funding_long_x18"`
 	CumulativeFundingShortX18 string `json:"cumulative_funding_short_x18"`
-	Dt                        int    `json:"dt"`
+	Dt                        string `json:"dt"`
 }
 type WSFundingRate struct {
 	Type           string `json:"type"`

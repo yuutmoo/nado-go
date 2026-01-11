@@ -261,7 +261,15 @@ func (c *StreamClient) getWorker(streamType string) chan []byte {
 	ch = make(chan []byte, 1024)
 	c.workers[streamType] = ch
 
-	go c.streamProcessor(streamType, ch)
+	go func() {
+		defer func() {
+			c.workersMu.Lock()
+			delete(c.workers, streamType)
+			close(ch)
+			c.workersMu.Unlock()
+		}()
+		c.streamProcessor(streamType, ch)
+	}()
 
 	return ch
 }

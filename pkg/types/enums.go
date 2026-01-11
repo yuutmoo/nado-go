@@ -12,10 +12,10 @@ const (
 type TriggerType int
 
 const (
-	TriggerTypeNone              TriggerType = 0
-	TriggerTypePrice             TriggerType = 1
-	TriggerTypeTwap              TriggerType = 2
-	TriggerTypeTwapCustomAmounts TriggerType = 3
+	TriggerTypeNone         TriggerType = 0
+	TriggerTypePrice        TriggerType = 1
+	TriggerTypeTwap         TriggerType = 2
+	TriggerTypeCustomAmount TriggerType = 3
 )
 
 type OrderDirection string
