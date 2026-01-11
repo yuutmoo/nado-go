@@ -27,7 +27,7 @@ The Gateway client handles order execution and account management.
 
 ```go
 // Place a single limit order
-order, err := client.PlaceOrder(ctx, &types.PlaceOrderParams{
+order, err := client.PlaceOrder(ctx, &types.PlaceOrderParam{
     ProductID: 2,
     Amount:    0.0013,
     Price:     100000,
@@ -35,7 +35,7 @@ order, err := client.PlaceOrder(ctx, &types.PlaceOrderParams{
 })
 
 // Batch place multiple orders
-resp, err := client.PlaceOrders(ctx, []*types.PlaceOrderParams{...}, false)
+resp, err := client.PlaceOrders(ctx, []*types.PlaceOrderParam{...}, false)
 
 // Atomic Cancel-and-Place
 resp, err := client.CancelAndPlaceOrder(ctx, &placeParams, &cancelParams)

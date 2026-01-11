@@ -12,7 +12,7 @@ import (
 	"math/big"
 )
 
-func (c *GatewayClient) PlaceOrder(ctx context.Context, params *types.PlaceOrderParams) (*types.PlaceOrderData, error) {
+func (c *GatewayClient) PlaceOrder(ctx context.Context, params *types.PlaceOrderParam) (*types.PlaceOrderData, error) {
 	if c.signer == nil {
 		return nil, fmt.Errorf("execution failed: no signer configured")
 	}
@@ -36,7 +36,7 @@ func (c *GatewayClient) PlaceOrder(ctx context.Context, params *types.PlaceOrder
 	return &resp.Data, nil
 }
 
-func (c *GatewayClient) PlaceOrders(ctx context.Context, orders []*types.PlaceOrderParams, stopOnFailure bool) (*types.PlaceOrdersData, error) {
+func (c *GatewayClient) PlaceOrders(ctx context.Context, orders []*types.PlaceOrderParam, stopOnFailure bool) (*types.PlaceOrdersData, error) {
 	if len(orders) == 0 {
 		return nil, fmt.Errorf("list is empty")
 	}
@@ -67,11 +67,22 @@ func (c *GatewayClient) PlaceOrders(ctx context.Context, orders []*types.PlaceOr
 	return &resp.Data, nil
 }
 
-func (c *GatewayClient) buildPlaceOrder(params *types.PlaceOrderParams) *types.PlaceOrderDetails {
+func (c *GatewayClient) buildPlaceOrder(params *types.PlaceOrderParam) *types.PlaceOrderDetails {
+
+	var priceTick float64
+	var amountTick float64
+	if val, ok := c.productCache.Load(params.ProductID); ok {
+		info := val.(types.ProductInfo)
+		priceTick = info.PriceTick
+		amountTick = info.AmountTick
+	} else {
+		fmt.Println("product priceTick, amountTick not found in cache")
+		return nil
+	}
 
 	senderHex := c.signer.SubAccount()
 
-	priceX18 := common.FloatToX18(params.Price, params.PriceTick)
+	priceX18 := common.FloatToX18(params.Price, priceTick)
 
 	finalAmount := params.Amount
 	if params.Amount < 0 {
@@ -82,7 +93,7 @@ func (c *GatewayClient) buildPlaceOrder(params *types.PlaceOrderParams) *types.P
 		finalAmount = -finalAmount
 	}
 
-	amountX18 := common.FloatToX18(finalAmount, params.AmountTick)
+	amountX18 := common.FloatToX18(finalAmount, amountTick)
 
 	nonce := common.GenerateNonce()
 
@@ -173,7 +184,7 @@ func (c *GatewayClient) CancelProductOrders(ctx context.Context, productIDs []in
 	return &resp.Data, nil
 }
 
-func (c *GatewayClient) CancelAndPlaceOrder(ctx context.Context, orderParam *types.PlaceOrderParams, cancelOrdersParam *types.CancelOrdersParam) (*types.PlaceOrderData, error) {
+func (c *GatewayClient) CancelAndPlaceOrder(ctx context.Context, orderParam *types.PlaceOrderParam, cancelOrdersParam *types.CancelOrdersParam) (*types.PlaceOrderData, error) {
 	if len(cancelOrdersParam.Params) == 0 {
 		return nil, nil
 	}
@@ -194,7 +205,7 @@ func (c *GatewayClient) CancelAndPlaceOrder(ctx context.Context, orderParam *typ
 
 }
 
-func (c *GatewayClient) buildCancelAndPlaceOrderPayload(orderParam *types.PlaceOrderParams, cancelOrdersParam *types.CancelOrdersParam) *types.CancelAndPlaceOrderPayload {
+func (c *GatewayClient) buildCancelAndPlaceOrderPayload(orderParam *types.PlaceOrderParam, cancelOrdersParam *types.CancelOrdersParam) *types.CancelAndPlaceOrderPayload {
 
 	cancelPayload := c.buildCancelOrdersPayload(cancelOrdersParam)
 	orderPayload := c.buildPlaceOrder(orderParam)

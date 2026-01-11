@@ -1,14 +1,12 @@
 package types
 
-type PlaceOrderParams struct {
+type PlaceOrderParam struct {
 	ProductID int
 
 	// Basic
-	Amount     float64
-	Price      float64
-	AmountTick float64
-	PriceTick  float64
-	Direction  OrderDirection
+	Amount    float64
+	Price     float64
+	Direction OrderDirection
 
 	// Flags
 	OrderType  OrderType

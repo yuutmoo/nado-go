@@ -7,17 +7,21 @@ import (
 	"fmt"
 	"github.com/yuutmoo/nado-go/pkg/common"
 	"github.com/yuutmoo/nado-go/pkg/signer"
+	"github.com/yuutmoo/nado-go/pkg/types"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 )
 
 type GatewayOption func(*GatewayClient)
 type GatewayClient struct {
-	network    common.NetworkConfig
-	httpClient *http.Client
-	signer     *signer.Signer
+	network      common.NetworkConfig
+	httpClient   *http.Client
+	signer       *signer.Signer
+	productCache sync.Map
 }
 
 func NewGatewayClient(opts ...GatewayOption) *GatewayClient {
@@ -34,6 +38,7 @@ func NewGatewayClient(opts ...GatewayOption) *GatewayClient {
 		opt(c)
 	}
 
+	c.syncProducts()
 	return c
 }
 
@@ -118,4 +123,29 @@ func (c *GatewayClient) buildGatewayURL(path string) string {
 // buildGatewayV2URL for V2 endpoints
 func (c *GatewayClient) buildGatewayV2URL(path string) string {
 	return c.network.GatewayV2 + path
+}
+
+func (c *GatewayClient) syncProducts() {
+	resp, err := c.GetAllProducts(context.Background())
+	if err != nil {
+		log.Printf("sync product fail: %v", err)
+		return
+	}
+	for _, p := range resp.Data.SpotProducts {
+		c.productCache.Store(p.ProductID, types.ProductInfo{
+			ProductID:  p.ProductID,
+			PriceTick:  common.X18ToFloat(p.BookInfo.PriceIncrementX18),
+			AmountTick: common.X18ToFloat(p.BookInfo.SizeIncrement),
+			MinSize:    common.X18ToFloat(p.BookInfo.MinSize),
+		})
+	}
+
+	for _, p := range resp.Data.PerpProducts {
+		c.productCache.Store(p.ProductID, types.ProductInfo{
+			ProductID:  p.ProductID,
+			PriceTick:  common.X18ToFloat(p.BookInfo.PriceIncrementX18),
+			AmountTick: common.X18ToFloat(p.BookInfo.SizeIncrement),
+			MinSize:    common.X18ToFloat(p.BookInfo.MinSize),
+		})
+	}
 }

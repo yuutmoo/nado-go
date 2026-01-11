@@ -29,3 +29,10 @@ type ExecuteResponse[T any] struct {
 	Signature string `json:"signature"`
 	ID        int64  `json:"id"`
 }
+
+type ProductInfo struct {
+	ProductID  int     `json:"product_id"`
+	PriceTick  float64 `json:"price_tick"`
+	AmountTick float64 `json:"amount_tick"`
+	MinSize    float64 `json:"min_size"`
+}

@@ -14,8 +14,6 @@ type StreamManager struct {
 	public  *StreamClient
 	private *StreamClient // (Order, Fill, Position)
 
-	wg sync.WaitGroup
-
 	privateMu     sync.RWMutex
 	privateRoutes map[string]struct{}
 }

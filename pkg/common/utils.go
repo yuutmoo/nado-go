@@ -40,7 +40,7 @@ func X18ToFloat(x18Str string) float64 {
 	return f
 }
 
-func BuildAppendix(params *types.PlaceOrderParams) *big.Int {
+func BuildAppendix(params *types.PlaceOrderParam) *big.Int {
 	// Bit Layout (from docs):
 	// Version (0-7): 1
 	// Isolated (8): 0 (assuming cross margin)

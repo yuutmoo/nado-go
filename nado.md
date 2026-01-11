@@ -13429,7 +13429,7 @@ await new Promise((resolve) => setTimeout(resolve, 10000));
 
 ## Create an order
 
-Placing an order requires a number of parameters, represented by the `PlaceOrderParams['order']` type.
+Placing an order requires a number of parameters, represented by the `PlaceOrderParam['order']` type.
 
 In the example below:
 
