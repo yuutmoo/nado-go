@@ -134,7 +134,7 @@ func (c *GatewayClient) syncProducts() {
 		log.Printf("sync product fail: %v", err)
 		return
 	}
-	for _, p := range resp.Data.SpotProducts {
+	for _, p := range resp.SpotProducts {
 		c.productCache.Store(p.ProductID, types.ProductInfo{
 			ProductID:  p.ProductID,
 			PriceTick:  common.X18ToFloat(p.BookInfo.PriceIncrementX18),
@@ -143,7 +143,7 @@ func (c *GatewayClient) syncProducts() {
 		})
 	}
 
-	for _, p := range resp.Data.PerpProducts {
+	for _, p := range resp.PerpProducts {
 		c.productCache.Store(p.ProductID, types.ProductInfo{
 			ProductID:  p.ProductID,
 			PriceTick:  common.X18ToFloat(p.BookInfo.PriceIncrementX18),

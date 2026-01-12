@@ -10,7 +10,7 @@ import (
 )
 
 // GetSystemStatus Gets status of offchain sequencer.
-func (c *GatewayClient) GetSystemStatus(ctx context.Context) (*types.SystemStatusResponse, error) {
+func (c *GatewayClient) GetSystemStatus(ctx context.Context) (string, error) {
 
 	params := url.Values{}
 	params.Set("type", "status")
@@ -20,19 +20,19 @@ func (c *GatewayClient) GetSystemStatus(ctx context.Context) (*types.SystemStatu
 	var resp types.SystemStatusResponse
 
 	if err := c.get(ctx, targetURL, params, &resp); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return "", fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return resp.Data, nil
 
 }
 
 // GetContracts Get information about core Nado contracts.
-func (c *GatewayClient) GetContracts(ctx context.Context) (*types.ContractsResponse, error) {
+func (c *GatewayClient) GetContracts(ctx context.Context) (*types.ContractsData, error) {
 	params := url.Values{}
 	params.Set("type", "contracts")
 
@@ -45,14 +45,14 @@ func (c *GatewayClient) GetContracts(ctx context.Context) (*types.ContractsRespo
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetNonces Get execute nonces for a particular address.
-func (c *GatewayClient) GetNonces(ctx context.Context, address string) (*types.NoncesResponse, error) {
+func (c *GatewayClient) GetNonces(ctx context.Context, address string) (*types.NoncesData, error) {
 	params := url.Values{}
 	params.Set("type", "nonces")
 	params.Set("address", address)
@@ -66,14 +66,14 @@ func (c *GatewayClient) GetNonces(ctx context.Context, address string) (*types.N
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetOrder retrieves the status and details of a specific order by its digest
-func (c *GatewayClient) GetOrder(ctx context.Context, productID int, digest string) (*types.OrderResponse, error) {
+func (c *GatewayClient) GetOrder(ctx context.Context, productID int, digest string) (*types.OrderData, error) {
 	params := url.Values{}
 	params.Set("type", "order")
 	params.Set("product_id", fmt.Sprintf("%d", productID))
@@ -88,10 +88,10 @@ func (c *GatewayClient) GetOrder(ctx context.Context, productID int, digest stri
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetSubaccountInfo retrieves the detailed state of a subaccount.
@@ -100,7 +100,7 @@ func (c *GatewayClient) GetOrder(ctx context.Context, productID int, digest stri
 //   - subaccount: The hex string address of the subaccount (e.g., "0x...").
 //   - simulations: Optional list of transactions to simulate (e.g., ApplyDelta). Pass nil if not needed.
 //   - withPreState: If true, the response will include the subaccount state BEFORE the simulated transactions in the 'pre_state' field.
-func (c *GatewayClient) GetSubaccountInfo(ctx context.Context, subaccount string, simulations []types.SimulateTx, withPreState bool) (*types.SubaccountInfoResponse, error) {
+func (c *GatewayClient) GetSubaccountInfo(ctx context.Context, subaccount string, simulations []types.SimulateTx, withPreState bool) (*types.SubaccountInfoData, error) {
 
 	reqPayload := types.SubaccountInfoRequest{
 		Type:       "subaccount_info",
@@ -131,15 +131,15 @@ func (c *GatewayClient) GetSubaccountInfo(ctx context.Context, subaccount string
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetIsolatedPositions retrieves isolated margin positions for a subaccount.
 // Endpoint: GET /query?type=isolated_positions&subaccount={subaccount}
-func (c *GatewayClient) GetIsolatedPositions(ctx context.Context, subaccount string) (*types.IsolatedPositionsResponse, error) {
+func (c *GatewayClient) GetIsolatedPositions(ctx context.Context, subaccount string) (*types.IsolatedPositionsDataWrapper, error) {
 	params := url.Values{}
 	params.Set("type", "isolated_positions")
 	params.Set("subaccount", subaccount)
@@ -153,15 +153,15 @@ func (c *GatewayClient) GetIsolatedPositions(ctx context.Context, subaccount str
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetMarketLiquidity retrieves the order book (bids and asks) for a specific product.
 // depth: The number of levels to retrieve (e.g., 10, 20).
-func (c *GatewayClient) GetMarketLiquidity(ctx context.Context, productID int, depth int) (*types.MarketLiquidityResponse, error) {
+func (c *GatewayClient) GetMarketLiquidity(ctx context.Context, productID int, depth int) (*types.MarketLiquidityData, error) {
 	params := url.Values{}
 	params.Set("type", "market_liquidity")
 	params.Set("product_id", fmt.Sprintf("%d", productID))
@@ -180,16 +180,16 @@ func (c *GatewayClient) GetMarketLiquidity(ctx context.Context, productID int, d
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetSymbols retrieves trading specifications.
 // productType: Optional filter ("spot", "perp", or "").
 // productIDs: Optional filter list of IDs. IMPORTANT: If provided, this forces a POST request.
-func (c *GatewayClient) GetSymbols(ctx context.Context, productType string, productIDs []int) (*types.SymbolsResponse, error) {
+func (c *GatewayClient) GetSymbols(ctx context.Context, productType string, productIDs []int) (*types.SymbolsData, error) {
 	targetURL := c.buildGatewayURL(common.PathQuery)
 	var resp types.SymbolsResponse
 
@@ -220,14 +220,14 @@ func (c *GatewayClient) GetSymbols(ctx context.Context, productType string, prod
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetAllProducts retrieves configuration and state for all available products.
-func (c *GatewayClient) GetAllProducts(ctx context.Context) (*types.AllProductsResponse, error) {
+func (c *GatewayClient) GetAllProducts(ctx context.Context) (*types.AllProductsData, error) {
 	params := url.Values{}
 	params.Set("type", "all_products")
 
@@ -240,15 +240,15 @@ func (c *GatewayClient) GetAllProducts(ctx context.Context) (*types.AllProductsR
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetEdgeAllProducts Gets info about all available products across all chains including: product id,
 // oracle price, configuration, state, etc.
-func (c *GatewayClient) GetEdgeAllProducts(ctx context.Context) (*types.EdgeAllProductsResponse, error) {
+func (c *GatewayClient) GetEdgeAllProducts(ctx context.Context) (*types.EdgeAllProductsData, error) {
 	params := url.Values{}
 	params.Set("type", "edge_all_products")
 
@@ -261,14 +261,14 @@ func (c *GatewayClient) GetEdgeAllProducts(ctx context.Context) (*types.EdgeAllP
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetMarketPrice retrieves the current best bid and ask prices for a specific product.
-func (c *GatewayClient) GetMarketPrice(ctx context.Context, productID int) (*types.MarketPriceResponse, error) {
+func (c *GatewayClient) GetMarketPrice(ctx context.Context, productID int) (*types.MarketPriceData, error) {
 	params := url.Values{}
 	params.Set("type", "market_price")
 	params.Set("product_id", fmt.Sprintf("%d", productID))
@@ -282,15 +282,15 @@ func (c *GatewayClient) GetMarketPrice(ctx context.Context, productID int) (*typ
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetMaxOrderSize calculates the maximum possible order size.
 // Using GET method as preferred for read-only calculations.
-func (c *GatewayClient) GetMaxOrderSize(ctx context.Context, params types.MaxOrderSizeParams) (*types.MaxOrderSizeResponse, error) {
+func (c *GatewayClient) GetMaxOrderSize(ctx context.Context, params types.MaxOrderSizeParams) (*types.MaxOrderSizeData, error) {
 	// 1. Build Query Parameters
 	queryParams := url.Values{}
 	queryParams.Set("type", "max_order_size")
@@ -331,13 +331,13 @@ func (c *GatewayClient) GetMaxOrderSize(ctx context.Context, params types.MaxOrd
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
-func (c *GatewayClient) GetMaxWithdrawable(ctx context.Context, productID int, sender string, spotLeverage bool) (*types.MaxWithdrawableResponse, error) {
+func (c *GatewayClient) GetMaxWithdrawable(ctx context.Context, productID int, sender string, spotLeverage bool) (*types.MaxWithdrawableData, error) {
 	params := url.Values{}
 	params.Set("type", "max_withdrawable")
 	params.Set("product_id", fmt.Sprintf("%d", productID))
@@ -358,15 +358,15 @@ func (c *GatewayClient) GetMaxWithdrawable(ctx context.Context, productID int, s
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetMaxNLPMintable calculates the maximum quote amount that can be used to mint NLP tokens.
 // spotLeverage: If true, includes spot leverage in the calculation.
-func (c *GatewayClient) GetMaxNLPMintable(ctx context.Context, sender string, spotLeverage bool) (*types.MaxNLPMintableResponse, error) {
+func (c *GatewayClient) GetMaxNLPMintable(ctx context.Context, sender string, spotLeverage bool) (*types.MaxNLPMintableData, error) {
 	params := url.Values{}
 	params.Set("type", "max_nlp_mintable")
 	params.Set("sender", sender)
@@ -386,14 +386,14 @@ func (c *GatewayClient) GetMaxNLPMintable(ctx context.Context, sender string, sp
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetMaxNLPBurnable calculates the maximum amount of NLP tokens that can be burned (redeemed).
-func (c *GatewayClient) GetMaxNLPBurnable(ctx context.Context, sender string) (*types.MaxNLPBurnableResponse, error) {
+func (c *GatewayClient) GetMaxNLPBurnable(ctx context.Context, sender string) (*types.MaxNLPBurnableData, error) {
 	params := url.Values{}
 	params.Set("type", "max_nlp_burnable")
 	params.Set("sender", sender)
@@ -407,14 +407,14 @@ func (c *GatewayClient) GetMaxNLPBurnable(ctx context.Context, sender string) (*
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetNLPPoolInfo retrieves information about Nado Liquidity Provider (NLP) pools.
-func (c *GatewayClient) GetNLPPoolInfo(ctx context.Context) (*types.NLPPoolInfoResponse, error) {
+func (c *GatewayClient) GetNLPPoolInfo(ctx context.Context) (*types.NLPPoolInfoData, error) {
 	params := url.Values{}
 	params.Set("type", "nlp_pool_info")
 
@@ -427,14 +427,14 @@ func (c *GatewayClient) GetNLPPoolInfo(ctx context.Context) (*types.NLPPoolInfoR
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetNLPLockedBalances retrieves locked and unlocked balance details for an NLP subaccount.
-func (c *GatewayClient) GetNLPLockedBalances(ctx context.Context, subaccount string) (*types.NLPLockedBalancesResponse, error) {
+func (c *GatewayClient) GetNLPLockedBalances(ctx context.Context, subaccount string) (*types.NLPLockedBalancesData, error) {
 	params := url.Values{}
 	params.Set("type", "nlp_locked_balances")
 	params.Set("subaccount", subaccount)
@@ -448,14 +448,14 @@ func (c *GatewayClient) GetNLPLockedBalances(ctx context.Context, subaccount str
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetFeeRates retrieves the trading fee rates and sequencer fees for a specific sender.
-func (c *GatewayClient) GetFeeRates(ctx context.Context, sender string) (*types.FeeRatesResponse, error) {
+func (c *GatewayClient) GetFeeRates(ctx context.Context, sender string) (*types.FeeRatesData, error) {
 	params := url.Values{}
 	params.Set("type", "fee_rates")
 	params.Set("sender", sender)
@@ -469,15 +469,15 @@ func (c *GatewayClient) GetFeeRates(ctx context.Context, sender string) (*types.
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetHealthGroups retrieves the configuration of health groups.
 // Note: a health group is a perp and spot product whose health is calculated together (e.g. BTC and BTC-PERP).
-func (c *GatewayClient) GetHealthGroups(ctx context.Context) (*types.HealthGroupsResponse, error) {
+func (c *GatewayClient) GetHealthGroups(ctx context.Context) (*types.HealthGroupsData, error) {
 	params := url.Values{}
 	params.Set("type", "health_groups")
 
@@ -490,15 +490,15 @@ func (c *GatewayClient) GetHealthGroups(ctx context.Context) (*types.HealthGroup
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetLinkedSigner retrieves the linked signer address for a specific subaccount.
 // This is useful to verify if a session key or delegate is currently authorized.
-func (c *GatewayClient) GetLinkedSigner(ctx context.Context, subaccount string) (*types.LinkedSignerResponse, error) {
+func (c *GatewayClient) GetLinkedSigner(ctx context.Context, subaccount string) (*types.LinkedSignerData, error) {
 	params := url.Values{}
 	params.Set("type", "linked_signer")
 	params.Set("subaccount", subaccount)
@@ -512,14 +512,14 @@ func (c *GatewayClient) GetLinkedSigner(ctx context.Context, subaccount string) 
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }
 
 // GetInsurance retrieves the current balance of the insurance fund.
-func (c *GatewayClient) GetInsurance(ctx context.Context) (*types.InsuranceResponse, error) {
+func (c *GatewayClient) GetInsurance(ctx context.Context) (*types.InsuranceData, error) {
 	params := url.Values{}
 	params.Set("type", "insurance")
 
@@ -532,8 +532,8 @@ func (c *GatewayClient) GetInsurance(ctx context.Context) (*types.InsuranceRespo
 	}
 
 	if !resp.IsSuccess() {
-		return &resp, fmt.Errorf("%s", resp.Error())
+		return nil, fmt.Errorf("%s", resp.Error())
 	}
 
-	return &resp, nil
+	return &resp.Data, nil
 }

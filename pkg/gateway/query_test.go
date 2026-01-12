@@ -26,7 +26,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Status=%s", resp.Data)
+		t.Logf("Success: Status=%s", resp)
 	})
 
 	t.Run("GetContracts", func(t *testing.T) {
@@ -34,7 +34,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Contracts=%s ChainID=%s", resp.Data.EndpointAddr, resp.Data.ChainID)
+		t.Logf("Success: Contracts=%s ChainID=%s", resp.EndpointAddr, resp.ChainID)
 	})
 
 	t.Run("GetFeeRates", func(t *testing.T) {
@@ -42,7 +42,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: TakerFeeRates len=%d", len(resp.Data.TakerFeeRatesX18))
+		t.Logf("Success: TakerFeeRates len=%d", len(resp.TakerFeeRatesX18))
 	})
 
 	t.Run("GetSubaccountInfo", func(t *testing.T) {
@@ -64,11 +64,7 @@ func TestAllQueryMethods(t *testing.T) {
 			t.Fatalf("API call failed: %v", err)
 		}
 
-		if !resp.IsSuccess() {
-			t.Errorf("Expected success, got %s", resp.Status)
-		}
-
-		if resp.Data.PreState != nil {
+		if resp.PreState != nil {
 			fmt.Println("fetch preState success")
 		}
 
@@ -78,7 +74,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Found %d health groups", len(resp.Data.HealthGroups))
+		t.Logf("Success: Found %d health groups", len(resp.HealthGroups))
 	})
 
 	t.Run("GetInsurance", func(t *testing.T) {
@@ -86,7 +82,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Insurance Fund=%s", resp.Data.Insurance)
+		t.Logf("Success: Insurance Fund=%s", resp.Insurance)
 	})
 
 	t.Run("GetAllProducts", func(t *testing.T) {
@@ -94,7 +90,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Spot=%d, Perp=%d", len(resp.Data.SpotProducts), len(resp.Data.PerpProducts))
+		t.Logf("Success: Spot=%d, Perp=%d", len(resp.SpotProducts), len(resp.PerpProducts))
 	})
 
 	t.Run("GetEdgeAllProducts", func(t *testing.T) {
@@ -102,7 +98,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Found network for %d chains", len(resp.Data.EdgeAllProducts))
+		t.Logf("Success: Found network for %d chains", len(resp.EdgeAllProducts))
 	})
 
 	t.Run("GetSymbols_GET", func(t *testing.T) {
@@ -110,7 +106,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success (GET): Found %d symbols", len(resp.Data.Symbols))
+		t.Logf("Success (GET): Found %d symbols", len(resp.Symbols))
 	})
 
 	t.Run("GetSymbols_POST", func(t *testing.T) {
@@ -118,7 +114,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success (POST): Found %d symbols (Filtered)", len(resp.Data.Symbols))
+		t.Logf("Success (POST): Found %d symbols (Filtered)", len(resp.Symbols))
 	})
 
 	t.Run("GetMarketLiquidity", func(t *testing.T) {
@@ -126,7 +122,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Bids=%d, Asks=%d", len(resp.Data.Bids), len(resp.Data.Asks))
+		t.Logf("Success: Bids=%d, Asks=%d", len(resp.Bids), len(resp.Asks))
 	})
 
 	t.Run("GetMarketPrice", func(t *testing.T) {
@@ -134,7 +130,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Bid=%s, Ask=%s", resp.Data.BidX18, resp.Data.AskX18)
+		t.Logf("Success: Bid=%s, Ask=%s", resp.BidX18, resp.AskX18)
 	})
 
 	t.Run("GetIsolatedPositions", func(t *testing.T) {
@@ -142,7 +138,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Found %d isolated positions", len(resp.Data.IsolatedPositions))
+		t.Logf("Success: Found %d isolated positions", len(resp.IsolatedPositions))
 	})
 
 	t.Run("GetNonces", func(t *testing.T) {
@@ -150,7 +146,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Next nonce=%s", resp.Data.TxNonce)
+		t.Logf("Success: Next nonce=%s", resp.TxNonce)
 	})
 
 	t.Run("GetLinkedSigner", func(t *testing.T) {
@@ -158,7 +154,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Linked Signer=%s", resp.Data.LinkedSigner)
+		t.Logf("Success: Linked Signer=%s", resp.LinkedSigner)
 	})
 
 	t.Run("GetOrder", func(t *testing.T) {
@@ -167,7 +163,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Logf("API returned error (expected if digest invalid): %v", err)
 		} else {
-			t.Logf("Success: Order Status=%s", resp.Data.OrderType)
+			t.Logf("Success: Order Status=%s", resp.OrderType)
 		}
 	})
 
@@ -185,7 +181,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Max Order Size=%s", resp.Data.MaxOrderSize)
+		t.Logf("Success: Max Order Size=%s", resp.MaxOrderSize)
 	})
 
 	t.Run("GetMaxWithdrawable", func(t *testing.T) {
@@ -193,7 +189,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Max Withdrawable=%s", resp.Data.MaxWithdrawable)
+		t.Logf("Success: Max Withdrawable=%s", resp.MaxWithdrawable)
 	})
 
 	t.Run("GetMaxNLPMintable", func(t *testing.T) {
@@ -201,7 +197,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Max Mintable Quote=%s", resp.Data.MaxQuoteAmount)
+		t.Logf("Success: Max Mintable Quote=%s", resp.MaxQuoteAmount)
 	})
 
 	t.Run("GetMaxNLPBurnable", func(t *testing.T) {
@@ -209,7 +205,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Max Burnable NLP=%s", resp.Data.MaxNLPAmount)
+		t.Logf("Success: Max Burnable NLP=%s", resp.MaxNLPAmount)
 	})
 
 	t.Run("GetNLPPoolInfo", func(t *testing.T) {
@@ -217,7 +213,7 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Found %d pools", len(resp.Data.NLPPools))
+		t.Logf("Success: Found %d pools", len(resp.NLPPools))
 	})
 
 	t.Run("GetNLPPockedBalances", func(t *testing.T) {
@@ -225,6 +221,6 @@ func TestAllQueryMethods(t *testing.T) {
 		if err != nil {
 			t.Fatalf("API Error: %v", err)
 		}
-		t.Logf("Success: Locked Balances Count=%d", len(resp.Data.LockedBalances))
+		t.Logf("Success: Locked Balances Count=%d", len(resp.LockedBalances))
 	})
 }
