@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/yuutmoo/nado-go/log"
 	"github.com/yuutmoo/nado-go/pkg/signer"
 	"time"
 )
@@ -46,6 +47,6 @@ func (c *StreamClient) Authenticate(ctx context.Context) error {
 		return fmt.Errorf("stream: send auth failed: %w", err)
 	}
 
-	fmt.Printf("stream: authentication request sent for %s\n", senderStr)
+	log.Printf("stream: authentication request sent for %s\n", senderStr)
 	return nil
 }

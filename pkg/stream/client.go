@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/bytedance/sonic"
 	"github.com/coder/websocket"
+	"github.com/yuutmoo/nado-go/log"
 	"github.com/yuutmoo/nado-go/pkg/common"
 	"github.com/yuutmoo/nado-go/pkg/signer"
+	"math"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -85,36 +87,65 @@ func (c *StreamClient) Dial(ctx context.Context) error {
 
 	c.conn = conn
 	c.ctx, c.cancel = context.WithCancel(context.Background())
-	fmt.Println("websocket client connected")
+	log.Println("websocket client connected")
 	go c.readLoop()
 	go c.keepAlive()
 	return nil
 }
 
 func (c *StreamClient) reconnect() {
+	const (
+		minDelay = 1 * time.Second
+		maxDelay = 60 * time.Second
+		factor   = 2.0
+	)
+
+	attempts := 0
+
 	for {
 		select {
 		case <-c.ctx.Done():
+			log.Debug("stream: stop reconnecting as context is cancelled")
 			return
 		default:
 		}
+		if attempts > 0 {
+			delay := time.Duration(float64(minDelay) * math.Pow(factor, float64(attempts-1)))
+			if delay > maxDelay {
+				delay = maxDelay
+			}
 
-		fmt.Println("stream: attempting to reconnect...")
+			jitter := time.Duration(rand.Int64n(int64(delay) / 5))
+			actualDelay := delay + jitter
+
+			log.Debugf("stream: waiting %v before next reconnect attempt (attempt %d)...", actualDelay, attempts)
+
+			timer := time.NewTimer(actualDelay)
+			select {
+			case <-c.ctx.Done():
+				timer.Stop()
+				return
+			case <-timer.C:
+			}
+		}
+
+		log.Debug("stream: attempting to reconnect...")
+		attempts++
 		err := c.Dial(context.Background())
 		if err != nil {
-			time.Sleep(time.Second * 5)
+			log.Errorf("stream: reconnect failed: %v", err)
 			continue
 		}
 		if c.signer != nil {
-			fmt.Println("stream: re-authenticating...")
+			log.Debug("stream: re-authenticating...")
 			if err := c.Authenticate(c.ctx); err != nil {
-				fmt.Printf("stream: auth failed after reconnect: %v\n", err)
-				time.Sleep(time.Second * 5)
+				log.Errorf("stream: auth failed after reconnect: %v", err)
 				continue
 			}
 		}
 
-		fmt.Println("stream: reconnected, restoring subscriptions...")
+		log.Debug("stream: reconnected, restoring subscriptions...")
+		var subErr error
 		c.subscriptions.Range(func(key, value interface{}) bool {
 			stream := value.(WSStream)
 			err := c.writeJSON(c.ctx, WSRequest{
@@ -124,12 +155,18 @@ func (c *StreamClient) reconnect() {
 			})
 
 			if err != nil {
-				fmt.Printf("stream: resubscribe failed for %s: %v\n", key, err)
+				log.Errorf("stream: resubscribe failed for %s: %v", key, err)
+				subErr = err
+				return false
 			}
 			return true
 		})
+		if subErr != nil {
+			continue
+		}
+		log.Infof("stream: reconnected and subscriptions restored after %d attempts", attempts)
+		attempts = 0
 		break
-
 	}
 }
 
@@ -173,7 +210,7 @@ func (c *StreamClient) readLoop() {
 			if websocket.CloseStatus(err) == websocket.StatusNormalClosure {
 				return
 			}
-			fmt.Printf("stream: read error: %v\n", err)
+			log.Errorf("stream: read error: %v\n", err)
 			return
 		}
 
@@ -195,10 +232,10 @@ func (c *StreamClient) handleControlMessage(data []byte) {
 	var resp WSResponse
 	if err := sonic.Unmarshal(data, &resp); err == nil {
 		if resp.Error != "" {
-			fmt.Printf("stream: control response error: %v\n", resp.Error)
+			log.Errorf("stream: control response error: %v\n", resp.Error)
 		}
 		if resp.Id != 0 {
-			fmt.Printf("stream: sub response received for id %d\n", resp.Id)
+			log.Errorf("stream: sub response received for id %d\n", resp.Id)
 		}
 	}
 }
@@ -210,7 +247,7 @@ func (c *StreamClient) dispatch(streamType string, data []byte) {
 	select {
 	case ch <- data:
 	default:
-		fmt.Printf("stream: [%s] processor queue full, dropping message\n", streamType)
+		log.Debugf("stream: [%s] processor queue full, dropping message\n", streamType)
 	}
 
 }
@@ -233,7 +270,7 @@ func (c *StreamClient) keepAlive() {
 			if c.conn != nil {
 				err := c.conn.Ping(c.ctx)
 				if err != nil {
-					fmt.Printf("stream: ping failed: %v, triggering reconnect\n", err)
+					log.Errorf("stream: ping failed: %v, triggering reconnect\n", err)
 					c.conn.Close(websocket.StatusAbnormalClosure, "ping timeout")
 					return
 				}
@@ -275,7 +312,7 @@ func (c *StreamClient) getWorker(streamType string) chan []byte {
 }
 
 func (c *StreamClient) streamProcessor(streamType string, ch chan []byte) {
-	fmt.Printf("stream: worker processor started for [%s]\n", streamType)
+	log.Printf("stream: worker processor started for [%s]\n", streamType)
 	for {
 		select {
 		case <-c.ctx.Done():

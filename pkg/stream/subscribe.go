@@ -3,6 +3,7 @@ package stream
 import (
 	"context"
 	"fmt"
+	"github.com/yuutmoo/nado-go/log"
 )
 
 type StreamOption func(*WSStream)
@@ -30,7 +31,7 @@ func (c *StreamClient) subscribe(streamType string, opts ...StreamOption) error 
 		Stream: stream,
 		ID:     c.requestID.Add(1),
 	}
-	fmt.Println("subscribing ", key)
+	log.Println("subscribing ", key)
 
 	err := c.writeJSON(context.Background(), req)
 	if err == nil {

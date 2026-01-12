@@ -1,8 +1,8 @@
 package stream
 
 import (
-	"fmt"
 	"github.com/bytedance/sonic"
+	"github.com/yuutmoo/nado-go/log"
 )
 
 type ResponseHandler func(data []byte)
@@ -13,7 +13,7 @@ func (c *StreamClient) OnTrade(callback func(data WSTradeData)) {
 		if err := sonic.Unmarshal(raw, &val); err == nil {
 			callback(val)
 		} else {
-			fmt.Printf("stream: unmarshal trade error: %v\n", err)
+			log.Errorf("stream: unmarshal trade error: %v\n", err)
 		}
 
 	})
@@ -25,7 +25,7 @@ func (c *StreamClient) OnFill(callback func(data WSFill)) {
 		if err := sonic.Unmarshal(raw, &val); err == nil {
 			callback(val)
 		} else {
-			fmt.Printf("stream: unmarshal trade error: %v\n", err)
+			log.Errorf("stream: unmarshal trade error: %v\n", err)
 		}
 
 	})
@@ -37,7 +37,7 @@ func (c *StreamClient) OnOrderUpdate(callback func(WSOrderUpdate)) {
 		if err := sonic.Unmarshal(data, &val); err == nil {
 			callback(val)
 		} else {
-			fmt.Printf("stream: unmarshal order update error: %v\n", err)
+			log.Errorf("stream: unmarshal order update error: %v\n", err)
 		}
 	})
 }
@@ -48,7 +48,7 @@ func (c *StreamClient) OnPositionChange(callback func(WSPositionChange)) {
 		if err := sonic.Unmarshal(data, &val); err == nil {
 			callback(val)
 		} else {
-			fmt.Printf("stream: unmarshal position change error: %v\n", err)
+			log.Errorf("stream: unmarshal position change error: %v\n", err)
 		}
 	})
 }
@@ -59,7 +59,7 @@ func (c *StreamClient) OnBookDepth(callback func(WSDepthData)) {
 		if err := sonic.Unmarshal(data, &val); err == nil {
 			callback(val)
 		} else {
-			fmt.Printf("stream: unmarshal book depth error: %v\n", err)
+			log.Errorf("stream: unmarshal book depth error: %v\n", err)
 		}
 	})
 }
@@ -70,7 +70,7 @@ func (c *StreamClient) OnBestBidOffer(callback func(WSBestBidOffer)) {
 		if err := sonic.Unmarshal(data, &val); err == nil {
 			callback(val)
 		} else {
-			fmt.Printf("stream: unmarshal best bid offer error: %v\n", err)
+			log.Errorf("stream: unmarshal best bid offer error: %v\n", err)
 		}
 	})
 }
@@ -81,7 +81,7 @@ func (c *StreamClient) OnCandlestick(callback func(WSLatestCandlestick)) {
 		if err := sonic.Unmarshal(data, &val); err == nil {
 			callback(val)
 		} else {
-			fmt.Printf("stream: unmarshal latest candlestick error: %v\n", err)
+			log.Errorf("stream: unmarshal latest candlestick error: %v\n", err)
 		}
 	})
 }
@@ -92,7 +92,7 @@ func (c *StreamClient) OnFundingRate(callback func(WSFundingRate)) {
 		if err := sonic.Unmarshal(data, &val); err == nil {
 			callback(val)
 		} else {
-			fmt.Printf("stream: unmarshal funding rate error: %v\n", err)
+			log.Errorf("stream: unmarshal funding rate error: %v\n", err)
 		}
 	})
 }
@@ -103,7 +103,7 @@ func (c *StreamClient) OnFundingPayment(callback func(WSFundingPayment)) {
 		if err := sonic.Unmarshal(data, &val); err == nil {
 			callback(val)
 		} else {
-			fmt.Printf("stream: unmarshal funding payment error: %v\n", err)
+			log.Errorf("stream: unmarshal funding payment error: %v\n", err)
 		}
 	})
 }
@@ -114,7 +114,7 @@ func (c *StreamClient) OnLiquidation(callback func(WSLiquidation)) {
 		if err := sonic.Unmarshal(data, &val); err == nil {
 			callback(val)
 		} else {
-			fmt.Printf("stream: unmarshal liquidation error: %v\n", err)
+			log.Errorf("stream: unmarshal liquidation error: %v\n", err)
 		}
 	})
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/jinzhu/copier"
+	"github.com/yuutmoo/nado-go/log"
 	"github.com/yuutmoo/nado-go/pkg/common"
 	"github.com/yuutmoo/nado-go/pkg/signer"
 	"github.com/yuutmoo/nado-go/pkg/types"
@@ -90,7 +91,7 @@ func (c *GatewayClient) buildPlaceOrder(params *types.PlaceOrderParam) *types.Pl
 		priceTick = info.PriceTick
 		amountTick = info.AmountTick
 	} else {
-		fmt.Println("product priceTick, amountTick not found in cache")
+		log.Error("product priceTick, amountTick not found in cache")
 		return nil
 	}
 
@@ -145,7 +146,7 @@ func (c *GatewayClient) buildPlaceOrder(params *types.PlaceOrderParam) *types.Pl
 
 	sig, err := c.signer.SignTypedData(internalOrder)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return nil
 	}
 
@@ -272,7 +273,7 @@ func (c *GatewayClient) buildCancelProductOrdersPayload(productIDs []int) *types
 
 	signature, err := c.signer.SignTypedData(CancellationProducts)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return nil
 	}
 	return &types.CancelProductOrdersPayload{
@@ -323,7 +324,7 @@ func (c *GatewayClient) buildCancelOrdersPayload(params *types.CancelOrdersParam
 	}
 	signature, err := c.signer.SignTypedData(cancellation)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return nil
 	}
 	return &types.CancelOrdersPayload{
@@ -365,7 +366,7 @@ func (c *GatewayClient) WithdrawCollateral(ctx context.Context, productId int, a
 	}
 	signature, err := c.signer.SignTypedData(internal)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return nil
 	}
 	payload := &types.WithdrawCollateralPayload{
