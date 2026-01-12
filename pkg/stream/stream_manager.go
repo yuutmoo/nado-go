@@ -32,7 +32,7 @@ func NewStreamManager(s *signer.Signer) *StreamManager {
 	}
 
 	if s != nil {
-		sm.private = NewStreamClient(WithSigner(sm.signer))
+		sm.private = NewStreamClient(WithSigner(sm.Signer))
 	}
 
 	return sm

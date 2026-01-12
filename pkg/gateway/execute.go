@@ -14,7 +14,7 @@ import (
 )
 
 func (c *GatewayClient) PlaceOrder(ctx context.Context, params *types.PlaceOrderParam) (*types.PlaceOrderData, error) {
-	if c.signer == nil {
+	if c.Signer == nil {
 		return nil, fmt.Errorf("execution failed: no signer configured")
 	}
 
@@ -106,7 +106,7 @@ func (c *GatewayClient) buildPlaceOrder(params *types.PlaceOrderParam) *types.Pl
 		}
 	}
 
-	senderHex := c.signer.SubAccount()
+	senderHex := c.Signer.SubAccount()
 
 	priceX18 := common.FloatToX18(params.Price, priceTick)
 
@@ -144,7 +144,7 @@ func (c *GatewayClient) buildPlaceOrder(params *types.PlaceOrderParam) *types.Pl
 		Appendix:   appendix,
 	}
 
-	sig, err := c.signer.SignTypedData(internalOrder)
+	sig, err := c.Signer.SignTypedData(internalOrder)
 	if err != nil {
 		log.Error(err)
 		return nil
@@ -172,7 +172,7 @@ func (c *GatewayClient) buildPlaceOrder(params *types.PlaceOrderParam) *types.Pl
 
 func (c *GatewayClient) CancelOrders(ctx context.Context, params *types.CancelOrdersParam, isTrigger bool) (*types.CancelOrdersData, error) {
 
-	if c.signer == nil {
+	if c.Signer == nil {
 		return nil, fmt.Errorf("execution failed: no signer configured")
 	}
 	if len(params.Params) == 0 {
@@ -252,7 +252,7 @@ func (c *GatewayClient) buildCancelAndPlaceOrderPayload(orderParam *types.PlaceO
 
 func (c *GatewayClient) buildCancelProductOrdersPayload(productIDs []int) *types.CancelProductOrdersPayload {
 
-	senderStr := c.signer.SubAccount()
+	senderStr := c.Signer.SubAccount()
 	var senderBytes32 [32]byte
 	senderBytes, _ := hex.DecodeString(senderStr[2:])
 	copy(senderBytes32[:], senderBytes)
@@ -271,7 +271,7 @@ func (c *GatewayClient) buildCancelProductOrdersPayload(productIDs []int) *types
 		VerifyingContract: c.network.EndPoint,
 	}
 
-	signature, err := c.signer.SignTypedData(CancellationProducts)
+	signature, err := c.Signer.SignTypedData(CancellationProducts)
 	if err != nil {
 		log.Error(err)
 		return nil
@@ -292,7 +292,7 @@ func (c *GatewayClient) buildCancelProductOrdersPayload(productIDs []int) *types
 }
 
 func (c *GatewayClient) buildCancelOrdersPayload(params *types.CancelOrdersParam) *types.CancelOrdersPayload {
-	senderStr := c.signer.SubAccount()
+	senderStr := c.Signer.SubAccount()
 	var senderBytes32 [32]byte
 	senderBytes, _ := hex.DecodeString(senderStr[2:])
 	copy(senderBytes32[:], senderBytes)
@@ -322,7 +322,7 @@ func (c *GatewayClient) buildCancelOrdersPayload(params *types.CancelOrdersParam
 		Nonce:             nonce,
 		VerifyingContract: c.network.EndPoint,
 	}
-	signature, err := c.signer.SignTypedData(cancellation)
+	signature, err := c.Signer.SignTypedData(cancellation)
 	if err != nil {
 		log.Error(err)
 		return nil
@@ -345,7 +345,7 @@ func (c *GatewayClient) buildCancelOrdersPayload(params *types.CancelOrdersParam
 
 func (c *GatewayClient) WithdrawCollateral(ctx context.Context, productId int, amount float64, tokenDecimals int32, SpotLeverage bool) error {
 
-	senderStr := c.signer.SubAccount()
+	senderStr := c.Signer.SubAccount()
 	var senderBytes32 [32]byte
 	senderBytes, _ := hex.DecodeString(senderStr[2:])
 	copy(senderBytes32[:], senderBytes)
@@ -364,7 +364,7 @@ func (c *GatewayClient) WithdrawCollateral(ctx context.Context, productId int, a
 		Amount:            amountVal,
 		VerifyingContract: c.network.EndPoint,
 	}
-	signature, err := c.signer.SignTypedData(internal)
+	signature, err := c.Signer.SignTypedData(internal)
 	if err != nil {
 		log.Error(err)
 		return nil

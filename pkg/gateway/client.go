@@ -45,7 +45,7 @@ func NewGatewayClient(opts ...GatewayOption) *GatewayClient {
 func WithPrivateKey(privateKeyHex string, subAccountName string, chainId int64) GatewayOption {
 	return func(c *GatewayClient) {
 		s := signer.NewSigner(privateKeyHex, subAccountName, chainId)
-		c.signer = s
+		c.Signer = s
 
 	}
 }

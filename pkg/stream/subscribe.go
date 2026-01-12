@@ -100,7 +100,7 @@ func (c *StreamClient) SubscribeFundingRate(productID *int) error {
 }
 
 func (c *StreamClient) SubscribeOrderUpdate(productID *int) error {
-	opts := []StreamOption{WithSubaccount(c.signer.SubAccount())}
+	opts := []StreamOption{WithSubaccount(c.Signer.SubAccount())}
 	if productID != nil {
 		opts = append(opts, WithProductID(*productID))
 	}
@@ -108,7 +108,7 @@ func (c *StreamClient) SubscribeOrderUpdate(productID *int) error {
 }
 
 func (c *StreamClient) SubscribeFill(productID *int) error {
-	opts := []StreamOption{WithSubaccount(c.signer.SubAccount())}
+	opts := []StreamOption{WithSubaccount(c.Signer.SubAccount())}
 	if productID != nil {
 		opts = append(opts, WithProductID(*productID))
 	}
@@ -116,7 +116,7 @@ func (c *StreamClient) SubscribeFill(productID *int) error {
 }
 
 func (c *StreamClient) SubscribePositionChange(productID *int) error {
-	opts := []StreamOption{WithSubaccount(c.signer.SubAccount())}
+	opts := []StreamOption{WithSubaccount(c.Signer.SubAccount())}
 	if productID != nil {
 		opts = append(opts, WithProductID(*productID))
 	}

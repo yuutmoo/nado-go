@@ -42,7 +42,7 @@ type StreamClientOption func(*StreamClient)
 func WithPrivateKey(privateKeyHex string, subAccountName string, chainId int64) StreamClientOption {
 	return func(c *StreamClient) {
 		s := signer.NewSigner(privateKeyHex, subAccountName, chainId)
-		c.signer = s
+		c.Signer = s
 	}
 }
 
@@ -54,7 +54,7 @@ func WithNetworkConfig(network common.NetworkConfig) StreamClientOption {
 
 func WithSigner(s *signer.Signer) StreamClientOption {
 	return func(c *StreamClient) {
-		c.signer = s
+		c.Signer = s
 	}
 }
 
@@ -137,7 +137,7 @@ func (c *StreamClient) reconnect() {
 			log.Errorf("stream: reconnect failed: %v", err)
 			continue
 		}
-		if c.signer != nil {
+		if c.Signer != nil {
 			log.Debug("stream: re-authenticating...")
 			if err := c.Authenticate(c.ctx); err != nil {
 				log.Errorf("stream: auth failed after reconnect: %v", err)
