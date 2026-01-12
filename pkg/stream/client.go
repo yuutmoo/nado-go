@@ -9,6 +9,7 @@ import (
 	"github.com/yuutmoo/nado-go/pkg/common"
 	"github.com/yuutmoo/nado-go/pkg/signer"
 	"math"
+	"math/rand/v2"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -115,7 +116,7 @@ func (c *StreamClient) reconnect() {
 				delay = maxDelay
 			}
 
-			jitter := time.Duration(rand.Int64n(int64(delay) / 5))
+			jitter := time.Duration(rand.Int64N(int64(delay) / 5))
 			actualDelay := delay + jitter
 
 			log.Debugf("stream: waiting %v before next reconnect attempt (attempt %d)...", actualDelay, attempts)
