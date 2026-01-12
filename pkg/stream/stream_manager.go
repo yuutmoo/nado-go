@@ -9,7 +9,7 @@ import (
 
 type StreamManager struct {
 	url    string
-	signer *signer.Signer
+	Signer *signer.Signer
 
 	public  *StreamClient
 	private *StreamClient // (Order, Fill, Position)
@@ -28,7 +28,7 @@ func NewStreamManager(s *signer.Signer) *StreamManager {
 			"fill":           {},
 			"positionChange": {},
 		},
-		signer: s,
+		Signer: s,
 	}
 
 	if s != nil {
