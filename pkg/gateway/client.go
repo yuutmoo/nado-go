@@ -20,7 +20,7 @@ type GatewayOption func(*GatewayClient)
 type GatewayClient struct {
 	network      common.NetworkConfig
 	httpClient   *http.Client
-	signer       *signer.Signer
+	Signer       *signer.Signer
 	productCache sync.Map
 }
 
@@ -31,7 +31,7 @@ func NewGatewayClient(opts ...GatewayOption) *GatewayClient {
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
 		},
-		signer: nil,
+		Signer: nil,
 	}
 
 	for _, opt := range opts {

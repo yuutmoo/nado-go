@@ -23,7 +23,7 @@ type StreamClient struct {
 	conn    *websocket.Conn
 	url     string
 
-	signer *signer.Signer
+	Signer *signer.Signer
 
 	mu         sync.Mutex
 	handlersMu sync.RWMutex
