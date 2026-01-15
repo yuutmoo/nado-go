@@ -236,7 +236,7 @@ func (c *StreamClient) handleControlMessage(data []byte) {
 			log.Errorf("stream: control response error: %v\n", resp.Error)
 		}
 		if resp.Id != 0 {
-			log.Println("stream: sub response received for id %d\n", resp.Id)
+			log.Printf("stream: sub response received for id %d\n", resp.Id)
 		}
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/yuutmoo/nado-go/pkg/signer"
-	"sync"
 )
 
 type StreamManager struct {
@@ -14,8 +13,6 @@ type StreamManager struct {
 	public  *StreamClient
 	private *StreamClient // (Order, Fill, Position)
 
-	privateMu     sync.RWMutex
-	privateRoutes map[string]struct{}
 }
 
 func NewStreamManager(s *signer.Signer) *StreamManager {
@@ -23,11 +20,6 @@ func NewStreamManager(s *signer.Signer) *StreamManager {
 	sm := &StreamManager{
 
 		public: NewStreamClient(),
-		privateRoutes: map[string]struct{}{
-			"orderUpdate":    {},
-			"fill":           {},
-			"positionChange": {},
-		},
 		Signer: s,
 	}
 
@@ -60,14 +52,6 @@ func (m *StreamManager) Close() {
 		_ = m.private.Close()
 	}
 }
-
-func (m *StreamManager) isPrivateRoute(streamType string) bool {
-	m.privateMu.RLock()
-	defer m.privateMu.RUnlock()
-	_, ok := m.privateRoutes[streamType]
-	return ok
-}
-
 func (m *StreamManager) OnTrade(cb func(WSTradeData)) {
 	m.public.OnTrade(cb)
 }

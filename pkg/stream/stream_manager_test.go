@@ -2,6 +2,7 @@ package stream
 
 import (
 	"context"
+	"github.com/yuutmoo/nado-go/log"
 	"github.com/yuutmoo/nado-go/pkg/common"
 	"github.com/yuutmoo/nado-go/pkg/signer"
 	"testing"
@@ -15,16 +16,20 @@ func TestStreamManager(t *testing.T) {
 		t.Fatal(err)
 	}
 	pid := 2
-	sm.SubscribeFill(&pid)
+
+	sm.OnOrderUpdate(func(order WSOrderUpdate) {
+		log.Debug(order)
+	})
+
+	//sm.OnFill(func(fill WSFill) {
+	//	log.Debug(fill)
+	//})
+	//sm.OnPositionChange(func(position WSPositionChange) {
+	//	log.Debug(position)
+	//})
+	//sm.SubscribeFill(&pid)
 	sm.SubscribeOrderUpdate(&pid)
-	sm.SubscribePositionChange(&pid)
-	sm.SubscribeCandlestick(pid, 60)
-	sm.SubscribeTrade(pid)
-	sm.SubscribeBookDepth(pid)
-	sm.SubscribeBestBidOffer(pid)
-	sm.SubscribeFundingRate(&pid)
-	sm.SubscribeLiquidation(&pid)
-	sm.SubscribeFundingPayment(pid)
+	//sm.SubscribePositionChange(&pid)
 
 	select {}
 }
